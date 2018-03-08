@@ -6,7 +6,6 @@ var $downvoteButton = $('.downvote-button');
 $('.save-idea-button').on('click', function(event) {
   createIdea();
   clearInputs();
-  storeIdeaList();
   event.preventDefault();
   $('#new-item-form').children('input').val('');
 });
@@ -17,71 +16,89 @@ $('.idea-list').on('blur', 'h2', editTitleText);
 $('.idea-list').on('blur', 'p', editBodyText);
 
 $(document).on('input', '.search-input', searchIdeas);
-$(window).on('load', function() {
-  loadIdeaList();
-  displayIdeas();
-});
+loadIdeas();
 
-function createIdea() {
-  var ideaTitleInputValue = $ideaTitleInput.val();
-  var ideaBodyInputValue = $ideaBodyInput.val();
-  prependIdea(ideaTitleInputValue, ideaBodyInputValue)
+function Idea(title, body, quality) {
+  this.title = title;
+  this.body = body;
+  this.quality = 'swill';
+  this.qualityCount = 0;
+  this.id = Date.now();
 }
 
-function prependIdea(title, body) {
-  $('.idea-list').prepend(`
-    <div class="idea" >
-      <h2 aria-label="Idea title" contenteditable="true">${title}</h2> 
-      <img tabindex="0" role="button" aria-label="Delete idea" class="delete-button icon" src="icons/delete.svg">
-      <p aria-label="Idea body" contenteditable="true">${body}</p>
-      <div class="vote-container">
-        <div class="vote-buttons-container">
-          <img tabindex="0" role="button" aria-label="Increase quality" class="upvote-button icon" src="icons/upvote.svg">
-          <img tabindex="0" role="button" aria-label="Decrease quality" class="downvote-button icon" src="icons/downvote.svg">
-        </div>
-        <p class="idea-quality-container">quality: <span class="idea-quality">swill</span></p>
-      </div>  
-      <hr>
-    </div>
-    `);
+function createIdea() {
+  var idea = new Idea($ideaTitleInput.val(), $ideaBodyInput.val(), 'swill');
+  storeIdea(idea);
+}
+
+function storeIdea(idea) {
+  var JSONidea = JSON.stringify(idea);
+  localStorage.setItem(idea.id, JSONidea);
+  loadIdeas();
 };
 
-function storeIdeaList() {
-  var ideaList = $('.idea-list').html();
-  var JSONIdeaList = JSON.stringify(ideaList);
-  localStorage.setItem('storedIdeaList', JSONIdeaList);
-  };
-
-function loadIdeaList() {
-  var retrievedIdeaList = localStorage.getItem('storedIdeaList');
-  var parsedIdeaList = JSON.parse(retrievedIdeaList);
-  $('.idea-list').prepend(parsedIdeaList);
+function loadIdeas() {
+  $('.idea-list').text('');
+  var keys = Object.keys(localStorage);
+  for (i = 0; i < keys.length; i++) {
+    var retrievedIdea = localStorage.getItem(keys[i]);
+    var idea = JSON.parse(retrievedIdea);
+    prependIdea(idea);
+  }
 };
+
+function prependIdea(idea) {
+$('.idea-list').prepend(`
+      <div class="idea" id="${idea.id}" >
+        <h2 aria-label="Idea title" contenteditable="true">${idea.title}</h2> 
+        <img tabindex="0" role="button" aria-label="Delete idea" class="delete-button icon" src="icons/delete.svg">
+        <p aria-label="Idea body" contenteditable="true">${idea.body}</p>
+        <div class="vote-container">
+          <div class="vote-buttons-container">
+            <img tabindex="0" role="button" aria-label="Increase quality" class="upvote-button icon" src="icons/upvote.svg">
+            <img tabindex="0" role="button" aria-label="Decrease quality" class="downvote-button icon" src="icons/downvote.svg">
+          </div>
+          <p class="idea-quality-container">quality: <span class="idea-quality">${idea.quality}</span></p>
+        </div>  
+        <hr>
+      </div>
+      `);
+}
 
 function deleteIdea() {
   $(this).closest('.idea').remove();
   storeIdeaList();
 }
 
+function getIdea(newThis) {
+  var key = newThis.closest('.idea').attr('id');
+  var retrievedIdea = localStorage.getItem(key);
+  var idea = JSON.parse(retrievedIdea);
+  return idea
+}
+
 function upvote() {
-  var $qualityLevel = $(this).parentsUntil('.idea').find('.idea-quality').text();
-  if ($qualityLevel === 'swill') {
-    $(this).parentsUntil('.idea').find('.idea-quality').text('plausible');
+  var idea = getIdea($(this));
+  if (idea.quality === 'swill') {
+    idea.quality = 'plausible'
   } else {
-    $(this).parentsUntil('.idea').find('.idea-quality').text('genius');
+    idea.quality = 'genius'
   }
-  storeIdeaList();
+  storeIdea(idea);
+  loadIdeas();
 }
 
 function downvote() {
-  var $qualityLevel = $(this).parentsUntil('.idea').find('.idea-quality').text();
-  if ($qualityLevel === 'genius') {
-    $(this).parentsUntil('.idea').find('.idea-quality').text('plausible');
+  var idea = getIdea($(this));
+  if (idea.quality === 'genius') {
+    idea.quality = 'plausible'
   } else {
-    $(this).parentsUntil('.idea').find('.idea-quality').text('swill');
+    idea.quality = 'swill'
   }
-  storeIdeaList();
-};
+  storeIdea(idea);
+  loadIdeas();
+}
+
 
 function searchIdeas() {
   var searchValue = $(this).val().toLowerCase();
@@ -96,10 +113,6 @@ function clearInputs() {
   $ideaBodyInput.val('');
 }
 
-function displayIdeas() {
-  $('.idea').removeAttr('style');
-}
-
 function editTitleText() {
   var newText = $(this).text();
   console.log($(this));
@@ -112,4 +125,18 @@ function editBodyText() {
   $(this).html(`${newText}`);
   storeIdeaList();
 };
+
+
+
+
+
+// function downvote() {
+//   var $qualityLevel = $(this).parentsUntil('.idea').find('.idea-quality').text();
+//   if ($qualityLevel === 'genius') {
+//     $(this).parentsUntil('.idea').find('.idea-quality').text('plausible');
+//   } else {
+//     $(this).parentsUntil('.idea').find('.idea-quality').text('swill');
+//   }
+//   storeIdeaList();
+// };
 
