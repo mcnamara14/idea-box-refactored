@@ -69,22 +69,14 @@ function deleteIdea() {
 
 function upvote() {
   let idea = getIdea($(this));
-  if (idea.quality === 'swill') {
-    idea.quality = 'plausible'
-  } else {
-    idea.quality = 'genius'
-  }
+  idea.quality === 'swill' ? idea.quality = 'plausible' : idea.quality = 'genius';
   storeIdea(idea);
   loadIdeas();
 }
 
 function downvote() {
   let idea = getIdea($(this));
-  if (idea.quality === 'genius') {
-    idea.quality = 'plausible'
-  } else {
-    idea.quality = 'swill'
-  }
+  idea.quality === 'genius' ? idea.quality = 'plausible' : idea.quality = 'swill';
   storeIdea(idea);
   loadIdeas();
 }
