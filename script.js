@@ -22,23 +22,23 @@ function Idea(title, body) {
   this.id = Date.now();
 }
 
-function createIdea() {
-  var idea = new Idea($('.idea-title-input').val(), $('.idea-body-input').val());
+let createIdea = () => {
+  let idea = new Idea($('.idea-title-input').val(), $('.idea-body-input').val());
   storeIdea(idea);
 }
 
-function storeIdea(idea) {
-  var JSONidea = JSON.stringify(idea);
+let storeIdea = (idea) => {
+  let JSONidea = JSON.stringify(idea);
   localStorage.setItem(idea.id, JSONidea);
   loadIdeas();
 };
 
 function loadIdeas() {
   $('.idea-list').text('');
-  var keys = Object.keys(localStorage);
+  let keys = Object.keys(localStorage);
   for (i = 0; i < keys.length; i++) {
-    var retrievedIdea = localStorage.getItem(keys[i]);
-    var idea = JSON.parse(retrievedIdea);
+    let retrievedIdea = localStorage.getItem(keys[i]);
+    let idea = JSON.parse(retrievedIdea);
     prependIdea(idea);
   }
 };
@@ -62,13 +62,13 @@ $('.idea-list').prepend(`
 }
 
 function deleteIdea() {
-  var idea = getIdea($(this));
+  let idea = getIdea($(this));
   localStorage.removeItem(idea.id);
   loadIdeas();
 }
 
 function upvote() {
-  var idea = getIdea($(this));
+  let idea = getIdea($(this));
   if (idea.quality === 'swill') {
     idea.quality = 'plausible'
   } else {
@@ -79,7 +79,7 @@ function upvote() {
 }
 
 function downvote() {
-  var idea = getIdea($(this));
+  let idea = getIdea($(this));
   if (idea.quality === 'genius') {
     idea.quality = 'plausible'
   } else {
@@ -89,34 +89,34 @@ function downvote() {
   loadIdeas();
 }
 
-function getIdea(newThis) {
-  var key = newThis.closest('.idea').attr('id');
-  var retrievedIdea = localStorage.getItem(key);
-  var idea = JSON.parse(retrievedIdea);
+let getIdea = (newThis) => {
+  let key = newThis.closest('.idea').attr('id');
+  let retrievedIdea = localStorage.getItem(key);
+  let idea = JSON.parse(retrievedIdea);
   return idea
 }
 
 function searchIdeas() {
-  var searchValue = $(this).val().toLowerCase();
+  let searchValue = $(this).val().toLowerCase();
   $(".idea-list .idea").filter(function() {
   $(this).toggle($(this).text().toLowerCase().indexOf(searchValue) > -1)
   });
 }
 
-function clearInputs() {
+let clearInputs = () => {
   $('.idea-title-input').val('');
   $('.idea-body-input').val('');
 }
 
 function editTitleText() {
-  var idea = getIdea($(this));
+  let idea = getIdea($(this));
   idea.title = $(this).text();
   storeIdea(idea);
   loadIdeas();
 };
 
 function editBodyText() {
-  var idea = getIdea($(this));
+  let idea = getIdea($(this));
   idea.body = $(this).text();
   storeIdea(idea);
   loadIdeas();
